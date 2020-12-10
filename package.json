@@ -1,7 +1,7 @@
 {
   "name": "transparent-herd",
   "version": "1.0.0",
-  "description": "A library for grouping singular calls into batch calls transparently to the caller",
+  "description": "A package for grouping singular calls into bulk or batch calls transparently to the caller",
   "scripts": {
     "transpile": "tsc",
     "test": "jest --coverage --config jestconfig.json",
