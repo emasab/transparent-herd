@@ -8,11 +8,11 @@ test('should batch different calls', async () => {
     return args.map((el, i) => Promise.resolve(el[0] + i));
   };
 
-  const single = transparentHerd.single(batched);
-  const acall = single('a');
-  const bcall = single('b');
-  const ccall = single('c');
-  const dcall = single('d');
+  const singular = transparentHerd.singular(batched);
+  const acall = singular('a');
+  const bcall = singular('b');
+  const ccall = singular('c');
+  const dcall = singular('d');
 
   jest.advanceTimersByTime(1000);
 
@@ -24,7 +24,7 @@ test('should batch different calls', async () => {
   const cresp = await ccall;
   const dresp = await dcall;
 
-  const ecall = single('e');
+  const ecall = singular('e');
 
   jest.advanceTimersByTime(1000);
 
@@ -42,12 +42,12 @@ test('should respect maxBatchSize', async () => {
     return args.map((el, i) => Promise.resolve(el[0] + i));
   };
 
-  const single = transparentHerd.single(batched, { maxBatchSize: 2 });
-  const acall = single('a');
-  const bcall = single('b');
-  const ccall = single('c');
-  const dcall = single('d');
-  const ecall = single('e');
+  const singular = transparentHerd.singular(batched, { maxBatchSize: 2 });
+  const acall = singular('a');
+  const bcall = singular('b');
+  const ccall = singular('c');
+  const dcall = singular('d');
+  const ecall = singular('e');
 
   jest.advanceTimersByTime(1000);
 

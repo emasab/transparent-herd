@@ -1,7 +1,5 @@
 /**
  * Error thrown if the input variables don't have the expected type
- *
- * an @Array of @Promise
  */
 export default class UnexpectedInputError extends Error {
   data: any;

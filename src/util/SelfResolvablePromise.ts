@@ -1,7 +1,7 @@
 export type ResolveFunction = (value: any) => void;
 export type RejectFunction = (reason: any) => void;
 /**
- *
+ * A decorator for a Promise that exposes it's resolve and reject callbacks as methods
  */
 export default class SelfResolvablePromise<T> {
   resolve: ResolveFunction | undefined;

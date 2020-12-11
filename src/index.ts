@@ -16,13 +16,15 @@ function isArrayOfPromises(input: any): input is ArrayOfPromises {
 export default {
   /**
    *
-   * TODO:
+   * Converts a batched functions to a singular one. If maxBatchSize is undefined,
+   * only one batched call at a time is done, otherwise calls with batches of at most maxBatchSize
+   * can be run in parallel
    *
-   * @param {(args: any[][]) => Promise<any>[]} batched TODO:
-   * @param {number | undefined} maxBatchSize TODO:
-   * @return {(any[])=>Promise<any>}
+   * @param {(args: any[][]) => Promise<any>[]} batched the batched function
+   * @param {PositiveInteger | undefined} maxBatchSize the max batch size of each batched call
+   * @returns {(any[])=>Promise<any>} the singular function
    */
-  single: (
+  singular: (
     batched: (args: any[][]) => Promise<Promise<any>[]>,
     { maxBatchSize }: { maxBatchSize: PositiveInteger | undefined } = {
       maxBatchSize: undefined,
