@@ -1,4 +1,4 @@
-# Transparent herd
+# transparent-herd
 
 ## What is this?
 
@@ -55,6 +55,12 @@ for (let i = 0; i < numCalls; i++) {
 ```
 
 The mean execution time out of 100 rounds was 12.8 times smaller with the convertion to bulk insert. See [transparent-herd-test](https://github.com/emasab/transparent-herd-test)
+
+## Getting started
+
+```bash
+npm install --save transparent-herd
+```
 
 ## Documentation
 
