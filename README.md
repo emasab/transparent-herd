@@ -66,7 +66,7 @@ npm install --save transparent-herd
 
 ### The singular function
 
-It converts a batched functions to a singular one. If maxBatchSize is undefined,
+It converts a batched function to a singular one. If maxBatchSize is undefined,
 only one batched call at a time is done, otherwise calls with batches of at most maxBatchSize can be run in parallel
 
 ### Params
