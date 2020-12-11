@@ -67,7 +67,7 @@ only one batched call at a time is done, otherwise calls with batches of at most
 
 **batched:** the batched function takes an array of arguments and returns an array of promises
 
-**maxBatchSize** if undefined, only one batch is run at a time, otherwise _n_ batches of _maxBatchSize_ can be run in parallel
+**maxBatchSize** if undefined, only one batch is run at a time, otherwise _n_ batches of at most _maxBatchSize_ can be run in parallel
 
 ### Returns
 
