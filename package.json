@@ -1,6 +1,6 @@
 {
   "name": "transparent-herd",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "A package for grouping singular calls into bulk or batch calls transparently to the caller",
   "scripts": {
     "transpile": "tsc",
