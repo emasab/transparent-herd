@@ -66,3 +66,19 @@ test('should respect maxBatchSize', async () => {
   expect(dresp).toEqual('d0');
   expect(eresp).toEqual('e1');
 });
+
+test('should throw if results length is different from arguments length', async () => {
+  const batched: (arg: any[][]) => Promise<Promise<string>[]> = async (args: string[][]) => {
+    return [];
+  };
+
+  const singular = transparentHerd.singular(batched);
+  const acall = singular('a');
+
+  try {
+    const aresp = await acall;
+    fail('it should not reach here');
+  } catch (e) {
+    expect(e.message).toBe("the result's length (0) is different from the arguments's length (1)");
+  }
+});

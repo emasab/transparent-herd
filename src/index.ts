@@ -57,6 +57,11 @@ export default {
             message: 'the result is not an array of promises',
           });
         }
+        if (results.length !== localQueue.length) {
+          throw new UnexpectedResultError({
+            message: `the result's length (${results.length}) is different from the arguments's length (${localQueue.length})`,
+          });
+        }
 
         for (let i = 0; i < localQueue.length; i++) {
           const elementI = localQueue[i];
