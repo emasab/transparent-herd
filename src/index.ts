@@ -5,8 +5,16 @@ import { SelfResolvablePromise } from './util/SelfResolvablePromise';
 
 type PositiveInteger = number;
 type ArrayOfPromises = Promise<unknown>[];
-type SingularFunction = (...args: any[]) => Promise<any>;
 type BatchId = Record<string, never>;
+/**
+ * SingularFunction models any async function
+ */
+export type SingularFunction = (...args: any[]) => Promise<any>;
+/**
+ * BatchedFunction models an async function that takes as argument an array of function arguments
+ * and resolves to an array of Promise
+ */
+export type BatchedFunction = (args: any[][]) => Promise<Promise<any>[]>;
 
 /**
  * Type guard to tests if the given number is a positive integer
@@ -35,7 +43,7 @@ function isArrayOfPromises(input: unknown): input is ArrayOfPromises {
  * @returns the singular function
  */
 export function singular(
-  batched: (args: any[][]) => Promise<Promise<any>[]>,
+  batched: BatchedFunction,
   { maxBatchSize }: { maxBatchSize: PositiveInteger | undefined } = {
     maxBatchSize: undefined,
   },
