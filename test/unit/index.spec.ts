@@ -1,9 +1,9 @@
-import transparentHerd from '../../src/index';
+import * as transparentHerd from '../../src/index';
 
 jest.useFakeTimers();
 
 test('should batch different calls', async () => {
-  const batched: (arg: any[][]) => Promise<Promise<string>[]> = async (args: string[][]) => {
+  const batched: (arg: string[][]) => Promise<Promise<string>[]> = async (args: string[][]) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     return args.map((el, i) => Promise.resolve(el[0] + i));
   };
@@ -37,7 +37,7 @@ test('should batch different calls', async () => {
 });
 
 test('should respect maxBatchSize', async () => {
-  const batched: (arg: any[][]) => Promise<Promise<string>[]> = async (args: string[][]) => {
+  const batched: (arg: string[][]) => Promise<Promise<string>[]> = async (args: string[][]) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     return args.map((el, i) => Promise.resolve(el[0] + i));
   };
@@ -68,7 +68,7 @@ test('should respect maxBatchSize', async () => {
 });
 
 test('should throw if results length is different from arguments length', async () => {
-  const batched: (arg: any[][]) => Promise<Promise<string>[]> = async (args: string[][]) => {
+  const batched: (args: string[][]) => Promise<Promise<string>[]> = async () => {
     return [];
   };
 
@@ -76,7 +76,7 @@ test('should throw if results length is different from arguments length', async 
   const acall = singular('a');
 
   try {
-    const aresp = await acall;
+    await acall;
     fail('it should not reach here');
   } catch (e) {
     expect(e.message).toBe("the result's length (0) is different from the arguments's length (1)");

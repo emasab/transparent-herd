@@ -1,12 +1,12 @@
 /**
  * Error thrown if the input variables don't have the expected type
  */
-export default class UnexpectedInputError extends Error {
-  data: any;
+export class UnexpectedInputError extends Error {
+  data: Record<string, unknown>;
 
   /**
    * Constructor taking an object with message property
-   * @param {Object} error the error object with message property
+   * @param error - the error object with message property
    * and additional properties
    */
   constructor(error: { message: string }) {

@@ -1,13 +1,16 @@
-export type ResolveFunction = (value: any) => void;
-export type RejectFunction = (reason: any) => void;
+export type ResolveFunction = (value: unknown) => void;
+export type RejectFunction = (reason: unknown) => void;
 /**
  * A decorator for a Promise that exposes it's resolve and reject callbacks as methods
  */
-export default class SelfResolvablePromise<T> {
+export class SelfResolvablePromise {
   resolve: ResolveFunction | undefined;
   reject: RejectFunction | undefined;
-  promise: Promise<T>;
+  promise: Promise<unknown>;
 
+  /**
+   * Default constructor
+   */
   constructor() {
     this.promise = new Promise((resolve: ResolveFunction, reject: RejectFunction) => {
       this.resolve = resolve;

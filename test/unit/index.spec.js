@@ -1,9 +1,12 @@
-const { default: transparentHerd } = require('../../src/index');
+/* eslint-disable @typescript-eslint/no-var-requires */
+const transparentHerd = require('../../src/index');
 
 jest.useFakeTimers();
 
 test('should throw if results is undefined', async () => {
-  const batched = async () => {};
+  const batched = async () => {
+    return undefined;
+  };
 
   const singular = transparentHerd.singular(batched);
   const acall = singular('a');
@@ -63,7 +66,12 @@ test('should throw if batched is not a function', async () => {
 
 test('should throw if maxBatchSize is not a number', async () => {
   try {
-    transparentHerd.singular(() => {}, { maxBatchSize: 'false' });
+    transparentHerd.singular(
+      () => {
+        return undefined;
+      },
+      { maxBatchSize: 'false' },
+    );
     fail('it should not reach here');
   } catch (e) {
     expect(e.message).toBe('maxBatchSize is not a number');
