@@ -62,6 +62,8 @@ npm install --save transparent-herd
 
 ## Documentation
 
+Full documentation [here](https://emasab.github.io/transparent-herd-doc/1.2.4/index.html)
+
 ### The singular function
 
 It converts a batched function to a singular one. If maxBatchSize is undefined,
