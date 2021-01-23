@@ -2,10 +2,11 @@
 import { UnexpectedResultError } from './error/UnexpectedResultError';
 import { UnexpectedInputError } from './error/UnexpectedInputError';
 import { SelfResolvablePromise } from './util/SelfResolvablePromise';
+import { v4 } from 'uuid';
 
 type PositiveInteger = number;
 type ArrayOfPromises = Promise<unknown>[];
-type BatchId = Record<string, never>;
+type BatchId = string;
 /**
  * SingularFunction models any async function
  */
@@ -44,8 +45,8 @@ function isArrayOfPromises(input: unknown): input is ArrayOfPromises {
  */
 export function singular(
   batched: BatchedFunction,
-  { maxBatchSize }: { maxBatchSize: PositiveInteger | undefined } = {
-    maxBatchSize: undefined,
+  { maxConcurrent }: { maxConcurrent: PositiveInteger } = {
+    maxConcurrent: 1,
   },
 ): SingularFunction {
   if (!(batched && typeof batched === 'function')) {
@@ -54,14 +55,14 @@ export function singular(
     });
   }
 
-  if (maxBatchSize !== undefined && !isPositiveInteger(maxBatchSize)) {
+  if (maxConcurrent !== undefined && !isPositiveInteger(maxConcurrent)) {
     throw new UnexpectedInputError({
-      message: 'maxBatchSize is not a number',
+      message: 'maxConcurrent is not a number',
     });
   }
 
-  const runningBatches: Promise<void>[] = [];
-  const runningIdentifiers: BatchId[] = [];
+  let runningBatches = 0;
+  const runningBatchesMap: Record<BatchId, Promise<void>> = {};
   let queue: [unknown[], SelfResolvablePromise][] = [];
 
   const runBatch = async (id: BatchId) => {
@@ -95,27 +96,27 @@ export function singular(
     }
 
     terminateBatch(id);
-    if (queue.length > 0 && runningBatches.length === 0) {
+    if (queue.length > 0 && runningBatches < maxConcurrent) {
       startNewBatch();
     }
   };
 
   const startNewBatch = () => {
-    const id = {};
-    runningIdentifiers.push(id);
-    runningBatches.push(runBatch(id));
+    const id = v4();
+    const batch = runBatch(id);
+    runningBatchesMap[id] = batch;
+    runningBatches++;
   };
 
   const terminateBatch = (id: BatchId) => {
-    const idx = runningIdentifiers.indexOf(id);
-    runningIdentifiers.splice(idx, 1);
-    runningBatches.splice(idx, 1);
+    delete runningBatchesMap[id];
+    runningBatches--;
   };
 
   return (...args: any[]) => {
     const promise = new SelfResolvablePromise();
     queue.push([args, promise]);
-    if (runningBatches.length === 0 || (maxBatchSize && queue.length >= maxBatchSize)) {
+    if (runningBatches < maxConcurrent) {
       startNewBatch();
     }
     return promise.promise;

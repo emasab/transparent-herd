@@ -64,16 +64,16 @@ test('should throw if batched is not a function', async () => {
   }
 });
 
-test('should throw if maxBatchSize is not a number', async () => {
+test('should throw if maxConcurrent is not a number', async () => {
   try {
     transparentHerd.singular(
       () => {
         return undefined;
       },
-      { maxBatchSize: 'false' },
+      { maxConcurrent: 'false' },
     );
     fail('it should not reach here');
   } catch (e) {
-    expect(e.message).toBe('maxBatchSize is not a number');
+    expect(e.message).toBe('maxConcurrent is not a number');
   }
 });

@@ -42,7 +42,7 @@ test('should respect maxBatchSize', async () => {
     return args.map((el, i) => Promise.resolve(el[0] + i));
   };
 
-  const singular = transparentHerd.singular(batched, { maxBatchSize: 2 });
+  const singular = transparentHerd.singular(batched, { maxConcurrent: 2 });
   const acall = singular('a');
   const bcall = singular('b');
   const ccall = singular('c');
@@ -52,19 +52,19 @@ test('should respect maxBatchSize', async () => {
   jest.advanceTimersByTime(1000);
 
   const aresp = await acall;
+  const bresp = await bcall;
 
   jest.advanceTimersByTime(1000);
 
-  const bresp = await bcall;
   const cresp = await ccall;
   const dresp = await dcall;
   const eresp = await ecall;
 
   expect(aresp).toEqual('a0');
   expect(bresp).toEqual('b0');
-  expect(cresp).toEqual('c1');
-  expect(dresp).toEqual('d0');
-  expect(eresp).toEqual('e1');
+  expect(cresp).toEqual('c0');
+  expect(dresp).toEqual('d1');
+  expect(eresp).toEqual('e2');
 });
 
 test('should throw if results length is different from arguments length', async () => {
