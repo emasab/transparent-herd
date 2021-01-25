@@ -41,7 +41,7 @@ const batched : transparentHerd.BatchedFunction = async (args) => {
 /*
   * This way you get a singular function out of the batched one
   */
-const singular: transparentHerd.SingularFunction = transparentHerd.singular(batched, { maxBatchSize });
+const singular: transparentHerd.SingularFunction = transparentHerd.singular(batched, { maxConcurrent });
 
 /*
  * Then you can use the singular function just as before
@@ -66,14 +66,15 @@ Full documentation [here](https://emasab.github.io/transparent-herd-doc/1.2.4/in
 
 ### The singular function
 
-It converts a batched function to a singular one. If maxBatchSize is undefined,
-only one batched call at a time is done, otherwise calls with batches of at most maxBatchSize can be run in parallel
+It Converts a batched functions to a singular one. If _maxConcurrent_ is 1,
+only one batched call at a time is done, otherwise al most _maxConcurrent_ concurrent
+calls are called each one taking a part of the remaining queue 
 
 ### Params
 
 **batched:** the batched function takes an array of arguments and returns an array of promises
 
-**maxBatchSize** if undefined, only one batch is run at a time, otherwise _n_ batches of at most _maxBatchSize_ can be run in parallel
+**maxConcurrent** if no passed, only one batch is run at a time, otherwise at most _maxConcurrent_ batches can be run in parallel
 
 ### Returns
 

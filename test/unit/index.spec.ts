@@ -36,7 +36,7 @@ test('should batch different calls', async () => {
   expect(eresp).toEqual('e0');
 });
 
-test('should respect maxBatchSize', async () => {
+test('should respect maxConcurrent', async () => {
   const batched: transparentHerd.BatchedFunction = async (args) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     return args.map((el, i) => Promise.resolve(el[0] + i));
@@ -48,6 +48,8 @@ test('should respect maxBatchSize', async () => {
   const ccall = singular('c');
   const dcall = singular('d');
   const ecall = singular('e');
+  const fcall = singular('f');
+  const gcall = singular('g');
 
   jest.advanceTimersByTime(1000);
 
@@ -60,11 +62,19 @@ test('should respect maxBatchSize', async () => {
   const dresp = await dcall;
   const eresp = await ecall;
 
+  jest.advanceTimersByTime(1000);
+  const fresp = await fcall;
+
+  jest.advanceTimersByTime(1000);
+  const gresp = await gcall;
+
   expect(aresp).toEqual('a0');
   expect(bresp).toEqual('b0');
   expect(cresp).toEqual('c0');
   expect(dresp).toEqual('d1');
-  expect(eresp).toEqual('e2');
+  expect(eresp).toEqual('e0');
+  expect(fresp).toEqual('f0');
+  expect(gresp).toEqual('g0');
 });
 
 test('should throw if results length is different from arguments length', async () => {

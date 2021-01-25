@@ -35,12 +35,12 @@ function isArrayOfPromises(input: unknown): input is ArrayOfPromises {
 
 /**
  *
- * Converts a batched functions to a singular one. If maxBatchSize is undefined,
- * only one batched call at a time is done, otherwise calls with batches of at most maxBatchSize
- * can be run in parallel
+ * Converts a batched functions to a singular one. If maxConcurrent is 1,
+ * only one batched call at a time is done, otherwise al most _maxConcurrent_ concurrent
+ * calls are called each one taking a part of the remaining queue
  *
  * @param batched - the batched function
- * @param maxBatchSize - the max batch size of each batched call
+ * @param maxConcurrent - the max number of concurrent calls
  * @returns the singular function
  */
 export function singular(
@@ -63,11 +63,10 @@ export function singular(
 
   let runningBatches = 0;
   const runningBatchesMap: Record<BatchId, Promise<void>> = {};
-  let queue: [unknown[], SelfResolvablePromise][] = [];
+  const queue: [unknown[], SelfResolvablePromise][] = [];
 
   const runBatch = async (id: BatchId) => {
-    const localQueue = new Array(...queue);
-    queue = [];
+    const localQueue = queue.splice(0, Math.max(Math.trunc(queue.length / runningBatches), 1));
     let results: ArrayOfPromises;
     try {
       results = await batched(localQueue.map((pair) => pair[0]));
@@ -103,9 +102,8 @@ export function singular(
 
   const startNewBatch = () => {
     const id = v4();
-    const batch = runBatch(id);
-    runningBatchesMap[id] = batch;
     runningBatches++;
+    runningBatchesMap[id] = runBatch(id);
   };
 
   const terminateBatch = (id: BatchId) => {
