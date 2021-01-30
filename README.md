@@ -62,7 +62,7 @@ npm install --save transparent-herd
 
 ## Documentation
 
-Full documentation [here](https://emasab.github.io/transparent-herd-doc/1.2.4/index.html)
+Full documentation [here](https://emasab.github.io/transparent-herd-doc/latest/index.html)
 
 ### The singular function
 
