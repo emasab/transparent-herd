@@ -2,7 +2,7 @@
 
 ## What is this?
 
-It's a Node.js package for grouping singular calls into bulk or batch calls, transparently to the caller
+It's a package for grouping singular calls into bulk or batch calls, transparently to the caller
 
 ## What does that mean?
 
@@ -25,9 +25,9 @@ is converted to an insertMany in the batched function.
 
 ```javascript
 /*
- * The batched function gets an array of function arguments and returns an array of promises
- */
-const batched : transparentHerd.BatchedFunction = async (args) => {
+* The batched function gets an array of function arguments and returns an array of promises
+*/
+const batched: transparentHerd.BatchedFunction = async (args) => {
   // the object to insert is the first argument of each list of arguments
   const documents = args.map((arg) => arg[0]);
   try {
@@ -41,18 +41,18 @@ const batched : transparentHerd.BatchedFunction = async (args) => {
 /*
   * This way you get a singular function out of the batched one
   */
-const singular: transparentHerd.SingularFunction = transparentHerd.singular(batched, { maxConcurrent });
+const singular: transparentHerd.SingularFunction = transparentHerd.singular(batched, { maxBatchSize });
 
 /*
- * Then you can use the singular function just as before
- */
+  * Then you can use the singular function just as before
+  */
 const allPromises = [];
 for (let i = 0; i < numCalls; i++) {
   allPromises.push(singular({ a: i }));
 }
 ```
 
-The mean execution time out of 100 rounds was 15.28 times smaller with the convertion to bulk insert. See [transparent-herd-test](https://github.com/emasab/transparent-herd-test)
+The mean execution time out of 100 rounds was 15.29 times smaller with the convertion to bulk insert. See [transparent-herd-test](https://github.com/emasab/transparent-herd-test)
 
 ## Getting started
 
@@ -66,15 +66,21 @@ Full documentation [here](https://emasab.github.io/transparent-herd-doc/latest/i
 
 ### The singular function
 
-It Converts a batched functions to a singular one. If _maxConcurrent_ is 1,
-only one batched call at a time is done, otherwise al most _maxConcurrent_ concurrent
-calls are called each one taking a part of the remaining queue 
+Converts a batched functions to a singular one.
+Al least _minConcurrent_ calls and at most _maxConcurrent_ are done at a time,
+at most _maxBatchSize_ is allocated to each call.
+When _maxBatchSize_ is reached, more concurrent calls are made, until
+_maxConcurrent_ is reached, if specified.
 
 ### Params
 
 **batched:** the batched function takes an array of arguments and returns an array of promises
 
-**maxConcurrent** if no passed, only one batch is run at a time, otherwise at most _maxConcurrent_ batches can be run in parallel
+**minConcurrent** the minimum number of concurrent calls or 1 if not specified
+
+**maxConcurrent** the maximum number of concurrent calls, only if _maxBatchSize_ is passed
+
+**maxBatchSize** the maximum batch size allocated to a call
 
 ### Returns
 

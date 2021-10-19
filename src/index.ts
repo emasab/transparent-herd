@@ -35,29 +35,66 @@ function isArrayOfPromises(input: unknown): input is ArrayOfPromises {
 
 /**
  *
- * Converts a batched functions to a singular one. If maxConcurrent is 1,
- * only one batched call at a time is done, otherwise al most _maxConcurrent_ concurrent
- * calls are called each one taking a part of the remaining queue
+ * Converts a batched functions to a singular one.
+ * Al least minConcurrent calls and at most maxConcurrent are done at a time,
+ * at most maxBatchSize is allocated to each call.
+ * When maxBatchSize is reached, more concurrent calls are made, until
+ * maxConcurrent is reached, if specified.
+ * Each call takes a part of the remaining queue
  *
  * @param batched - the batched function
- * @param maxConcurrent - the max number of concurrent calls
+ * @param minConcurrent - the minimum number of concurrent calls
+ * @param maxConcurrent - the maximum number of concurrent calls
+ * @param maxBatchSize - the maximum batch size allocated to a call
  * @returns the singular function
  */
 export function singular(
   batched: BatchedFunction,
-  { maxConcurrent }: { maxConcurrent: PositiveInteger } = {
-    maxConcurrent: 1,
-  },
+  {
+    minConcurrent,
+    maxConcurrent,
+    maxBatchSize,
+  }: {
+    minConcurrent?: PositiveInteger;
+    maxConcurrent?: PositiveInteger;
+    maxBatchSize?: PositiveInteger;
+  } = {},
 ): SingularFunction {
-  if (!(batched && typeof batched === 'function')) {
+  if (!!minConcurrent && !isPositiveInteger(minConcurrent)) {
     throw new UnexpectedInputError({
-      message: 'batched is not a function',
+      message: 'minConcurrent is not a number',
     });
   }
 
-  if (maxConcurrent !== undefined && !isPositiveInteger(maxConcurrent)) {
+  if (!!maxConcurrent && !isPositiveInteger(maxConcurrent)) {
     throw new UnexpectedInputError({
       message: 'maxConcurrent is not a number',
+    });
+  }
+
+  if (!!minConcurrent && !!maxConcurrent && maxConcurrent < minConcurrent) {
+    throw new UnexpectedInputError({
+      message: 'maxConcurrent must be greater or equal to minConcurrent',
+    });
+  }
+
+  if (!!maxBatchSize && !isPositiveInteger(maxBatchSize)) {
+    throw new UnexpectedInputError({
+      message: 'maxBatchSize is not a number',
+    });
+  }
+
+  if (!!maxConcurrent && !maxBatchSize) {
+    throw new UnexpectedInputError({
+      message: 'maxConcurrent is used without maxBatchSize',
+    });
+  }
+
+  const notNullMinConcurrent = minConcurrent || 1;
+
+  if (!(batched && typeof batched === 'function')) {
+    throw new UnexpectedInputError({
+      message: 'batched is not a function',
     });
   }
 
@@ -66,7 +103,9 @@ export function singular(
   const queue: [unknown[], SelfResolvablePromise][] = [];
 
   const runBatch = async (id: BatchId) => {
-    const localQueue = queue.splice(0, Math.max(Math.trunc(queue.length / runningBatches), 1));
+    const shouldTakeBatchSize = Math.max(Math.trunc(queue.length / runningBatches), 1);
+    const takeBatchSize = Math.min(shouldTakeBatchSize, maxBatchSize || shouldTakeBatchSize);
+    const localQueue = queue.splice(0, takeBatchSize);
     let results: ArrayOfPromises;
     try {
       results = await batched(localQueue.map((pair) => pair[0]));
@@ -94,8 +133,21 @@ export function singular(
       }
     }
 
+    const reducedBatches = runningBatches > 1 ? runningBatches - 1 : 1;
+    const reducedChunkLength = Math.max(Math.trunc(queue.length / reducedBatches), 1);
+    const nextChunkLength = Math.max(Math.trunc(queue.length / runningBatches), 1);
+
+    const apoptosis =
+      queue.length === 0 ||
+      (runningBatches > notNullMinConcurrent && (!maxBatchSize || reducedChunkLength <= maxBatchSize));
+    const mitosis =
+      (!maxConcurrent || (maxConcurrent && runningBatches < maxConcurrent)) &&
+      maxBatchSize &&
+      nextChunkLength > maxBatchSize;
+
     terminateBatch(id);
-    if (queue.length > 0 && runningBatches < maxConcurrent) {
+    if (!apoptosis) {
+      if (mitosis) startNewBatch();
       startNewBatch();
     }
   };
@@ -114,7 +166,7 @@ export function singular(
   return (...args: any[]) => {
     const promise = new SelfResolvablePromise();
     queue.push([args, promise]);
-    if (runningBatches < maxConcurrent) {
+    if (runningBatches < notNullMinConcurrent) {
       startNewBatch();
     }
     return promise.promise;

@@ -3,7 +3,7 @@ const transparentHerd = require('../../src/index');
 
 jest.useFakeTimers();
 
-test('should throw if results is undefined', async () => {
+test('throw if results is undefined', async () => {
   const batched = async () => {
     return undefined;
   };
@@ -18,7 +18,7 @@ test('should throw if results is undefined', async () => {
   }
 });
 
-test('should throw if results is not an array', async () => {
+test('throw if results is not an array', async () => {
   const batched = async () => {
     return true;
   };
@@ -33,7 +33,7 @@ test('should throw if results is not an array', async () => {
   }
 });
 
-test('should throw if a result is not a promise', async () => {
+test('throw if a result is not a promise', async () => {
   const batched = async (args) => {
     return args.map((el, i) => el + i);
   };
@@ -48,7 +48,7 @@ test('should throw if a result is not a promise', async () => {
   }
 });
 
-test('should throw if batched is not a function', async () => {
+test('throw if batched is not a function', async () => {
   try {
     transparentHerd.singular(null);
     fail('it should not reach here');
@@ -64,16 +64,47 @@ test('should throw if batched is not a function', async () => {
   }
 });
 
-test('should throw if maxConcurrent is not a number', async () => {
+test('throw if minConcurrent is not a number', async () => {
   try {
     transparentHerd.singular(
       () => {
         return undefined;
       },
-      { maxConcurrent: 'false' },
+      { minConcurrent: 'false' },
+    );
+    fail('it should not reach here');
+  } catch (e) {
+    expect(e.message).toBe('minConcurrent is not a number');
+  }
+});
+
+test('throw if maxConcurrent is not a number', async () => {
+  try {
+    transparentHerd.singular(
+      () => {
+        return undefined;
+      },
+      {
+        minConcurrent: 3,
+        maxConcurrent: 'false',
+      },
     );
     fail('it should not reach here');
   } catch (e) {
     expect(e.message).toBe('maxConcurrent is not a number');
+  }
+});
+
+test('throw if maxBatchSize is not a number', async () => {
+  try {
+    transparentHerd.singular(
+      () => {
+        return undefined;
+      },
+      { maxBatchSize: 'false' },
+    );
+    fail('it should not reach here');
+  } catch (e) {
+    expect(e.message).toBe('maxBatchSize is not a number');
   }
 });
